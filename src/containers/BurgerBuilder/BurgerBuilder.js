@@ -1,5 +1,4 @@
-import React from 'react'
-import Aux from '../../hoc/Aux'
+import React, { useState, useEffect } from 'react'
 import Burger from '../../components/Burger/Burger';
 import BuildControls from '../../components/Burger/BuildControls/BuildControls'
 import Modal from '../../components/ui/Modal/Modal'
@@ -10,21 +9,17 @@ import WithErrorHandler from '../../hoc/withErrorHandler/withErrorhandler'
 import { connect } from 'react-redux'
 import * as actions from '../../store/actions'
 
-class BurgerBuilder extends React.Component {
-    state = {
-        // ingredient: null,
-        // totalPrice: 4,
-        purchaseable: false,
-        purchasing: false,
-        loading: false,
-        error: false
-    }
+const BurgerBuilder = props => {
+    const [purchaseable, setPurchaseable] = useState(false)
+    const [purchasing, setPurchasing] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState(false)
+    const { onInitIngredients } = props
+    useEffect(() => {
+        onInitIngredients()
+    }, [onInitIngredients])
 
-    componentDidMount() {
-        this.props.onInitIngredients()
-    }
-
-    updatePurchaseState(ingredient) {
+    const updatePurchaseState = (ingredient) => {
         const ingredients = {
             ...ingredient
         }
@@ -36,70 +31,68 @@ class BurgerBuilder extends React.Component {
         return sum > 0
     }
 
-    purchaseHandler = () => {
-        if (this.props.isAuthenticate) {
-            this.setState({ purchasing: true })
+    const purchaseHandler = () => {
+        if (props.isAuthenticate) {
+            setPurchasing(true)
         } else {
-            this.props.onSetAuthRedirect('/checkout')
-            this.props.history.push('/auth')
+            props.onSetAuthRedirect('/checkout')
+            props.history.push('/auth')
         }
     }
 
-    purchaseCancelHandler = () => {
-        this.setState({ purchasing: false })
+    const purchaseCancelHandler = () => {
+        setPurchasing(false)
     }
 
-    purchaseContinueHandler = () => {
-        this.props.onInitPurchase()
-        this.props.history.push('/checkout')
+    const purchaseContinueHandler = () => {
+        props.onInitPurchase()
+        props.history.push('/checkout')
     }
-    render() {
-        const disabledInfo = {
-            ...this.props.ings
-        }
-        for (let key in disabledInfo) {
-            disabledInfo[key] = disabledInfo[key] <= 0
-        }
-
-        let orderSummary = null
-
-        let burger = this.props.error ? <p>Ingridients can't be loaded</p> : <Spinner />
-        if (this.props.ings) {
-            burger = (
-                <Aux>
-                    <Burger ingredient={this.props.ings}></Burger>
-                    <BuildControls
-                        isAuth={this.props.isAuthenticate}
-                        addIngredient={this.props.onIngredientAdded}
-                        removeIngredient={this.props.onIngredientRemoved}
-                        disabled={disabledInfo}
-                        price={this.props.totalPrice}
-                        purchaseable={this.updatePurchaseState(this.props.ings)}
-                        ordered={this.purchaseHandler}
-                    ></BuildControls>
-                </Aux>
-            )
-            orderSummary = <OrderSummary
-                purchaseCancel={this.purchaseCancelHandler}
-                purchaseContinue={this.purchaseContinueHandler}
-                ingredients={this.props.ings}
-                totalPrice={this.props.totalPrice}
-            ></OrderSummary>
-        }
-        if (this.state.loading) {
-            orderSummary = <Spinner />
-        }
-
-        return (
-
-            <Aux>
-                <Modal show={this.state.purchasing} modalClosed={this.purchaseCancelHandler}>
-                    {orderSummary}
-                </Modal>
-                {burger}
-            </Aux>
-        );
+    const disabledInfo = {
+        ...props.ings
     }
+    for (let key in disabledInfo) {
+        disabledInfo[key] = disabledInfo[key] <= 0
+    }
+
+    let orderSummary = null
+
+    let burger = props.error ? <p>Ingridients can't be loaded</p> : <Spinner />
+    if (props.ings) {
+        burger = (
+            <React.Fragment>
+                <Burger ingredient={props.ings}></Burger>
+                <BuildControls
+                    isAuth={props.isAuthenticate}
+                    addIngredient={props.onIngredientAdded}
+                    removeIngredient={props.onIngredientRemoved}
+                    disabled={disabledInfo}
+                    price={props.totalPrice}
+                    purchaseable={updatePurchaseState(props.ings)}
+                    ordered={purchaseHandler}
+                ></BuildControls>
+            </React.Fragment>
+        )
+        orderSummary = <OrderSummary
+            purchaseCancel={purchaseCancelHandler}
+            purchaseContinue={purchaseContinueHandler}
+            ingredients={props.ings}
+            totalPrice={props.totalPrice}
+        ></OrderSummary>
+    }
+    if (loading) {
+        orderSummary = <Spinner />
+    }
+
+    return (
+
+        <React.Fragment>
+            <Modal show={purchasing} modalClosed={purchaseCancelHandler}>
+                {orderSummary}
+            </Modal>
+            {burger}
+        </React.Fragment>
+    );
 }
 
 

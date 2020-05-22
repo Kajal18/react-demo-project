@@ -5,36 +5,35 @@ import ContactData from './ContactData/ContactData'
 import { connect } from 'react-redux'
 import * as actions from '../../store/actions'
 
-class CheckoOut extends React.Component {
+const CheckoOut = props => {
 
-    checkoutCancelHandler = () => {
-        this.props.history.goBack()
+    const checkoutCancelHandler = () => {
+        props.history.goBack()
     }
 
-    checkouContinuedHandler = () => {
-        this.props.history.replace('/checkout/contact-data')
+    const checkouContinuedHandler = () => {
+        props.history.replace('/checkout/contact-data')
     }
-    render() {
-        let summary = <Redirect to='/' />
-        if (this.props.ings) {
-            console.log('ceckut', this.props)
-            const purchasedRedirect = this.props.purchase ? <Redirect to="/" /> : null
-            summary = (
-                <div>
-                    {purchasedRedirect}
-                    <CheckoutSummary
-                        ingredient={this.props.ings}
-                        checkoutCancel={this.checkoutCancelHandler}
-                        checkouContinued={this.checkouContinuedHandler}
-                    />
 
-                    <Route path={this.props.match.path + '/contact-data'}
-                        component={ContactData} />
-                </div>
-            )
-        }
-        return summary
+    let summary = <Redirect to='/' />
+    if (props.ings) {
+        console.log('ceckut', props)
+        const purchasedRedirect = props.purchase ? <Redirect to="/" /> : null
+        summary = (
+            <div>
+                {purchasedRedirect}
+                <CheckoutSummary
+                    ingredient={props.ings}
+                    checkoutCancel={checkoutCancelHandler}
+                    checkouContinued={checkouContinuedHandler}
+                />
+
+                <Route path={props.match.path + '/contact-data'}
+                    component={ContactData} />
+            </div>
+        )
     }
+    return summary
 }
 
 const mapStateToProps = state => {
