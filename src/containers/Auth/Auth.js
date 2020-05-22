@@ -118,13 +118,13 @@ const Auth = props => {
             <p>{props.error.message}</p>
         )
     }
-    let authRedirect = null
+    let authRedirectPath = null
     if (props.isAuthenticated) {
-        authRedirect = <Redirect to={props.authRedirect}></Redirect>
+        authRedirectPath = <Redirect to={props.authRedirect}></Redirect>
     }
     return (
         <div className={classes.Auth}>
-            {authRedirect}
+            {authRedirectPath}
             {errorMessage}
             {form}
             <Button
